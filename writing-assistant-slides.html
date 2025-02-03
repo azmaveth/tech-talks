@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LLMs as Writing Assistants</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #2A1B17;
+            --text-color: #FFFFFF;
+            --primary-color: #FF6B3D;
+            --secondary-color: #4A3029;
+            --accent-color: #FFA07A;
+        }
+
+        .reveal {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .reveal h1, .reveal h2, .reveal h3 {
+            color: var(--primary-color);
+            font-family: 'Georgia', serif;
+			margin-bottom: 0.5em;
+        }
+
+        .reveal .slides section {
+            text-align: left;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+		
+		.title-slide {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .title-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .title-image {
+            width: 100%;
+            height: 250px;
+            margin-top: auto;
+        }
+
+        .split-screen {
+            display: flex;
+            justify-content: space-between;
+            gap: 1em;
+            max-height: calc(100vh - 200px);
+            overflow: hidden;
+        }
+
+        .split-screen > div {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .myth-reality {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+            max-height: calc(100vh - 200px);
+        }
+
+        .reveal .slides {
+            font-size: 24px;
+        }
+
+        .quote {
+            font-size: 2em;
+            text-align: center;
+            font-style: italic;
+            margin: 50px 0;
+            color: var(--primary-color);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        pre {
+            background-color: var(--secondary-color) !important;
+            border-left: 4px solid var(--primary-color);
+            padding: 0.8em !important;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            color: var(--text-color);
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 0.8em;
+            margin: 10px 0;
+        }
+
+        .feature-card {
+            background: var(--secondary-color);
+            border-radius: 8px;
+            padding: 1.2em;
+            margin: 0.8em 0;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+			max-height: calc(100vh - 250px);
+            overflow-y: auto;
+        }
+
+        .icon-container {
+            text-align: center;
+            margin: 1.5em 0;
+        }
+
+        ul li {
+            margin: 0.4em 0;
+            color: var(--text-color);
+            line-height: 1.4;
+        }
+
+        .highlight {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* Scrollbar styling */
+        .feature-card::-webkit-scrollbar,
+        pre::-webkit-scrollbar,
+        .split-screen > div::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .feature-card::-webkit-scrollbar-thumb,
+        pre::-webkit-scrollbar-thumb,
+        .split-screen > div::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        .feature-card::-webkit-scrollbar-track,
+        pre::-webkit-scrollbar-track,
+        .split-screen > div::-webkit-scrollbar-track {
+            background: var(--secondary-color);
+        }
+
+        .feature-card ul, .feature-card ol {
+            margin-left: 20px;
+            padding-left: 0;
+        }
+
+        .reveal h1 { font-size: 2.2em; }
+        .reveal h2 { font-size: 1.8em; }
+        .reveal h3 { font-size: 1.4em; }
+        
+        /* Added for better spacing */
+        .reveal ul, .reveal ol {
+            margin-bottom: 0.5em;
+        }
+        
+        /* Better code block visibility */
+        pre code {
+            max-height: 200px;
+            display: block;
+        }
+		
+		/* Header with icon spacing */
+        .header-with-icon {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1em;
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- Title Slide -->
+            <section>
+                <div class="title-slide">
+                    <div class="title-content">
+                        <h1>LLMs as Writing Assistants</h1>
+                        <h3>Amplifying Human Creativity in the Age of AI</h3>
+                        <p class="fragment fade-in">A hands-on guide to transforming your writing process</p>
+                    </div>
+                    <div class="title-image">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 250" style="width: 100%; height: 100%;">
+                            <!-- Background wave -->
+                            <path d="M0 180 C200 160 400 200 800 180 L800 250 L0 250 Z" 
+                                  fill="#4A3029" opacity="0.6"/>
+                            
+                            <!-- Writing elements -->
+                            <g transform="translate(100, 80)">
+                                <!-- Paper stack -->
+                                <rect x="0" y="0" width="120" height="80" fill="#FFA07A" rx="5"/>
+                                <rect x="5" y="-5" width="120" height="80" fill="#FF6B3D" rx="5"/>
+                                <rect x="10" y="-10" width="120" height="80" fill="#4A3029" rx="5"/>
+                                
+                                <!-- Text lines -->
+                                <line x1="30" y1="20" x2="110" y2="20" stroke="#FFA07A" stroke-width="3">
+                                    <animate attributeName="x2" values="30;110;110" dur="2s" begin="0s" fill="freeze"/>
+                                </line>
+                                <line x1="30" y1="35" x2="90" y2="35" stroke="#FFA07A" stroke-width="3">
+                                    <animate attributeName="x2" values="30;90;90" dur="2s" begin="0.3s" fill="freeze"/>
+                                </line>
+                                <line x1="30" y1="50" x2="100" y2="50" stroke="#FFA07A" stroke-width="3">
+                                    <animate attributeName="x2" values="30;100;100" dur="2s" begin="0.6s" fill="freeze"/>
+                                </line>
+                            </g>
+                            
+                            <!-- AI elements - Center -->
+                            <g transform="translate(350, 60)">
+                                <!-- Neural network connections -->
+                                <circle cx="0" cy="0" r="8" fill="#FF6B3D"/>
+                                <circle cx="50" cy="30" r="8" fill="#FF6B3D"/>
+                                <circle cx="100" cy="0" r="8" fill="#FF6B3D"/>
+                                <circle cx="75" cy="60" r="8" fill="#FF6B3D"/>
+                                <circle cx="25" cy="60" r="8" fill="#FF6B3D"/>
+                                
+                                <!-- Connections -->
+                                <path d="M0 0 L50 30 M50 30 L100 0 M50 30 L75 60 M50 30 L25 60" 
+                                      stroke="#FFA07A" stroke-width="2" stroke-dasharray="5,5">
+                                    <animate attributeName="stroke-dasharray" 
+                                             values="5,5;3,3;5,5" 
+                                             dur="2s" 
+                                             repeatCount="indefinite"/>
+                                </path>
+                            </g>
+                            
+                            <!-- AI elements - Right -->
+                            <g transform="translate(600, 60)">
+                                <!-- Circuit board patterns -->
+                                <path d="M0 0 L40 0 L40 40 L80 40" stroke="#FF6B3D" stroke-width="3" fill="none">
+                                    <animate attributeName="stroke-dasharray" values="0,200;200,0" dur="2s" fill="freeze"/>
+                                </path>
+                                <path d="M0 40 L20 40 L20 80 L60 80" stroke="#FF6B3D" stroke-width="3" fill="none">
+                                    <animate attributeName="stroke-dasharray" values="0,200;200,0" dur="2s" begin="0.3s" fill="freeze"/>
+                                </path>
+                                <circle cx="80" cy="40" r="5" fill="#FFA07A">
+                                    <animate attributeName="r" values="0;5;4" dur="2s" fill="freeze"/>
+                                </circle>
+                                <circle cx="60" cy="80" r="5" fill="#FFA07A">
+                                    <animate attributeName="r" values="0;5;4" dur="2s" begin="0.3s" fill="freeze"/>
+                                </circle>
+                            </g>
+                            
+                            <!-- Additional decorative elements -->
+                            <circle cx="250" cy="90" r="4" fill="#FFA07A">
+                                <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="550" cy="130" r="4" fill="#FFA07A">
+                                <animate attributeName="opacity" values="0;1;0" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+                            </circle>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quote Slide -->
+            <section>
+                <div class="quote">
+                    "The art of writing is rewriting."
+                    <p style="font-size: 0.5em; margin-top: 20px;" class="fragment fade-in">— Every Writing Teacher Ever</p>
+                </div>
+            </section>
+
+            <!-- What if Slide -->
+            <section>
+                <h2>But what if...</h2>
+                <div class="feature-card">
+                    <ul>
+                        <li class="fragment fade-in">Your first draft was better?</li>
+                        <li class="fragment fade-in">Your revisions were faster?</li>
+                        <li class="fragment fade-in">Your creative blocks disappeared?</li>
+                        <li class="fragment fade-in">Your writing process was actually enjoyable?</li>
+                    </ul>
+                </div>
+            </section>
+
+<!-- Meet Your Partner Slide -->
+            <section>
+                <h2 style="margin-bottom: 0.3em;">Meet Your New Writing Partner</h2>
+                <div class="icon-container" style="height: 300px; margin: 20px 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" style="width: 100%; height: 100%;">
+                        <!-- AI Assistant Circle -->
+                        <g transform="translate(200, 130)">
+                            <!-- Outer glow effect -->
+                            <circle cx="0" cy="0" r="80" fill="#4A3029" stroke="#FF6B3D" stroke-width="4">
+                                <animate attributeName="stroke-opacity" values="0.4;0.8;0.4" dur="3s" repeatCount="indefinite"/>
+                            </circle>
+                            
+                            <!-- Face -->
+                            <circle cx="-20" cy="-10" r="8" fill="#FFA07A"/> <!-- Left eye -->
+                            <circle cx="20" cy="-10" r="8" fill="#FFA07A"/> <!-- Right eye -->
+                            <path d="M-15 -12 A 20 20 0 0 1 15 -12" stroke="#FFA07A" stroke-width="3" fill="none"/> <!-- Eyebrows -->
+                            <path d="M-30 20 Q0 40 30 20" stroke="#FFA07A" stroke-width="3" fill="none"> <!-- Smile -->
+                                <animate attributeName="d" 
+                                         values="M-30 20 Q0 40 30 20;M-30 25 Q0 45 30 25;M-30 20 Q0 40 30 20" 
+                                         dur="3s" 
+                                         repeatCount="indefinite"/>
+                            </path>
+
+                            <!-- Animated binary/text particles -->
+                            <g>
+                                <text x="-60" y="-60" fill="#FF6B3D" font-size="12" opacity="0.8">
+                                    01
+                                    <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+                                </text>
+                                <text x="40" y="-40" fill="#FF6B3D" font-size="12" opacity="0.8">
+                                    10
+                                    <animate attributeName="opacity" values="0;1;0" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+                                </text>
+                                <text x="50" y="20" fill="#FF6B3D" font-size="12" opacity="0.8">
+                                    11
+                                    <animate attributeName="opacity" values="0;1;0" dur="2s" begin="1s" repeatCount="indefinite"/>
+                                </text>
+                            </g>
+                        </g>
+
+                        <!-- Floating Features -->
+                        <g>
+                            <!-- "24/7" -->
+                            <text x="80" y="80" fill="#FFA07A" font-size="16" text-anchor="middle">
+                                24/7
+                                <animateTransform attributeName="transform"
+                                                  type="translate"
+                                                  values="0,0; 0,-5; 0,0"
+                                                  dur="2s"
+                                                  repeatCount="indefinite"/>
+                            </text>
+
+                            <!-- "Multiple Styles" -->
+                            <text x="320" y="80" fill="#FFA07A" font-size="16" text-anchor="middle">
+                                Styles
+                                <animateTransform attributeName="transform"
+                                                  type="translate"
+                                                  values="0,0; 0,-5; 0,0"
+                                                  dur="2s"
+                                                  begin="0.5s"
+                                                  repeatCount="indefinite"/>
+                            </text>
+
+                            <!-- "Never Tired" -->
+                            <text x="80" y="220" fill="#FFA07A" font-size="16" text-anchor="middle">
+                                Always Fresh
+                                <animateTransform attributeName="transform"
+                                                  type="translate"
+                                                  values="0,0; 0,-5; 0,0"
+                                                  dur="2s"
+                                                  begin="1s"
+                                                  repeatCount="indefinite"/>
+                            </text>
+
+                            <!-- "Adapts to You" -->
+                            <text x="320" y="220" fill="#FFA07A" font-size="16" text-anchor="middle">
+                                Adapts to You
+                                <animateTransform attributeName="transform"
+                                                  type="translate"
+                                                  values="0,0; 0,-5; 0,0"
+                                                  dur="2s"
+                                                  begin="1.5s"
+                                                  repeatCount="indefinite"/>
+                            </text>
+                        </g>
+
+                        <!-- Connecting dots between features -->
+<!--                        <g stroke="#FF6B3D" stroke-width="2" stroke-dasharray="5,5">
+                            <path d="M80 85 L200 130" opacity="0.6">
+                                <animate attributeName="stroke-dashoffset" values="0;100" dur="20s" repeatCount="indefinite"/>
+                            </path>
+                            <path d="M320 85 L200 130" opacity="0.6">
+                                <animate attributeName="stroke-dashoffset" values="0;100" dur="20s" repeatCount="indefinite"/>
+                            </path>
+                            <path d="M80 215 L200 130" opacity="0.6">
+                                <animate attributeName="stroke-dashoffset" values="0;100" dur="20s" repeatCount="indefinite"/>
+                            </path>
+                            <path d="M320 215 L200 130" opacity="0.6">
+                                <animate attributeName="stroke-dashoffset" values="0;100" dur="20s" repeatCount="indefinite"/>
+                            </path>
+                        </g> -->
+-->
+                    </svg>
+                </div>
+                <div class="feature-card" style="margin-top: 20px;">
+                    <ul>
+                        <li class="fragment fade-in" style="margin: 0.3em 0;">Brainstorms 24/7</li>
+                        <li class="fragment fade-in" style="margin: 0.3em 0;">Never gets writer's block</li>
+                        <li class="fragment fade-in" style="margin: 0.3em 0;">Speaks multiple styles</li>
+                        <li class="fragment fade-in" style="margin: 0.3em 0;">Adapts to your voice</li>
+                        <li class="fragment fade-in" style="margin: 0.3em 0;">Remembers everything you tell it</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- What We'll Cover -->
+            <section>
+                <div class="header-with-icon">
+                    <h2>What We'll Cover Today</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" style="width: 80px; height: 80px; margin-left: 15px; vertical-align: middle;">
+                        <!-- Outer circle -->
+                        <circle cx="100" cy="100" r="90" fill="#4A3029" stroke="#FF6B3D" stroke-width="8"/>
+                        <!-- Inner circle -->
+                        <circle cx="100" cy="100" r="10" fill="#FF6B3D"/>
+                        <!-- Compass points -->
+                        <path d="M100 20 L100 40 M100 160 L100 180 M20 100 L40 100 M160 100 L180 100" stroke="#FF6B3D" stroke-width="8"/>
+                        <!-- Direction markers -->
+                        <text x="100" y="30" fill="#FFA07A" text-anchor="middle" font-size="30">N</text>
+                        <text x="100" y="180" fill="#FFA07A" text-anchor="middle" font-size="30">S</text>
+                        <text x="180" y="105" fill="#FFA07A" text-anchor="middle" font-size="30">E</text>
+                        <text x="20" y="105" fill="#FFA07A" text-anchor="middle" font-size="30">W</text>
+                        <!-- Compass needle -->
+                        <path d="M100 100 L120 60 L100 20 L80 60 Z" fill="#FF6B3D" transform="rotate(15, 100, 100)"/>
+                        <path d="M100 100 L120 140 L100 180 L80 140 Z" fill="#FFA07A" transform="rotate(15, 100, 100)"/>
+                    </svg>
+                </div>
+                <div class="feature-card">
+                    <ul>
+                        <li class="fragment fade-in">Types of Writing Support</li>
+                        <li class="fragment fade-in">Prompting Best Practices</li>
+                        <li class="fragment fade-in">Workflow Integration</li>
+                        <li class="fragment fade-in">Ethical Considerations</li>
+                        <li class="fragment fade-in">Practical Tips</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Demo Slide -->
+            <section>
+                <h2 style="margin-bottom: 0.3em;">Quick Demo: The Power of AI Writing Assistance</h2>
+                <div class="split-screen" style="max-height: none; gap: 2em;">
+                    <div>
+                        <h3 style="margin: 0 0 0.3em 0;">Before</h3>
+                        <pre class="fragment fade-in" style="font-size: 0.85em; max-height: none; padding: 0.6em !important;">Hey team,
+
+Just wanted to update you on 
+the project status. We're running 
+behind on some deliverables but 
+should catch up soon.
+
+Let me know if you have questions.
+
+Thanks</pre>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0 0 0.3em 0;">After</h3>
+                        <pre class="fragment fade-in" style="font-size: 0.85em; max-height: none; padding: 0.6em !important;">Dear Team,
+
+I'm writing to provide a transparent 
+update on our project timeline. While 
+we're currently 2 days behind on the 
+UI deliverables, we've implemented a 
+recovery plan that will bring us back 
+on schedule by next Wednesday.
+
+Key actions:
+- Added two developers to frontend team
+- Prioritized critical path items
+- Scheduled daily standups
+
+Please review the attached timeline 
+and let me know if you have any 
+questions or concerns.
+
+Best regards,</pre>
+                    </div>
+                </div>
+                <p class="fragment fade-in highlight" style="margin-top: 0.5em;">Time spent: 90 seconds</p>
+            </section>
+
+            <!-- Misconceptions Slide -->
+            <section>
+                <h2>Common Misconceptions</h2>
+                <div class="myth-reality">
+                    <div class="feature-card">
+                        <h3>Myth</h3>
+                        <p class="fragment fade-in">"AI will replace human writers"</p>
+                        <p class="fragment fade-in">"AI-written content lacks originality"</p>
+                        <p class="fragment fade-in">"Using AI is cheating"</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Reality</h3>
+                        <p class="fragment fade-in">AI amplifies human creativity</p>
+                        <p class="fragment fade-in">AI helps unlock your unique voice</p>
+                        <p class="fragment fade-in">AI is a tool, like spell-check</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Types of Writing Support - Section Title -->
+            <section>
+                <h2>Types of Writing Support</h2>
+                <p class="fragment fade-in">Five key ways LLMs transform your writing process</p>
+                <div class="icon-container fragment fade-in" style="height: 300px; margin: 20px 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" style="width: 100%; height: 100%;">
+                        <!-- Center circle -->
+                        <circle cx="400" cy="150" r="40" fill="#4A3029" stroke="#FF6B3D" stroke-width="4"/>
+                        <text x="400" y="155" text-anchor="middle" fill="#FFA07A" font-size="12">Writing</text>
+
+                        <!-- Brainstorming (Top Left) -->
+                        <circle cx="200" cy="75" r="35" fill="#4A3029" stroke="#FF6B3D" stroke-width="4"/>
+                        <path d="M185 75 Q200 55 215 75" stroke="#FFA07A" stroke-width="2" fill="none"/>
+                        <circle cx="190" cy="70" r="2" fill="#FFA07A"/>
+                        <circle cx="210" cy="70" r="2" fill="#FFA07A"/>
+                        <path d="M200 85 L200 65" stroke="#FFA07A" stroke-width="8">
+                            <animate attributeName="d" values="M195 85 L205 85;M190 85 L210 85;M195 85 L205 85" dur="2s" repeatCount="indefinite"/>
+                        </path>
+                        <text x="200" y="100" text-anchor="middle" fill="#FFA07A" font-size="12">Ideation</text>
+
+                        <!-- Organization (Top Right) -->
+                        <circle cx="600" cy="75" r="35" fill="#4A3029" stroke="#FF6B3D" stroke-width="4"/>
+                        <rect x="580" y="65" width="40" height="5" fill="#FFA07A"/>
+                        <rect x="580" y="75" width="30" height="5" fill="#FFA07A"/>
+                        <rect x="580" y="85" width="35" height="5" fill="#FFA07A"/>
+                        <text x="600" y="100" text-anchor="middle" fill="#FFA07A" font-size="12">Structure</text>
+
+                        <!-- Draft Generation (Left) -->
+                        <circle cx="150" cy="200" r="35" fill="#4A3029" stroke="#FF6B3D" stroke-width="4"/>
+                        <path d="M135 190 L165 190 L165 210 L135 210 Z" fill="none" stroke="#FFA07A" stroke-width="2"/>
+                        <line x1="140" y1="195" x2="160" y2="195" stroke="#FFA07A" stroke-width="2">
+                            <animate attributeName="x2" values="140;160;160" dur="2s" repeatCount="indefinite"/>
+                        </line>
+                        <line x1="140" y1="200" x2="155" y2="200" stroke="#FFA07A" stroke-width="2">
+                            <animate attributeName="x2" values="140;155;155" dur="2s" repeatCount="indefinite"/>
+                        </line>
+                        <line x1="140" y1="205" x2="150" y2="205" stroke="#FFA07A" stroke-width="2">
+                            <animate attributeName="x2" values="140;150;150" dur="2s" repeatCount="indefinite"/>
+                        </line>
+                        <text x="150" y="225" text-anchor="middle" fill="#FFA07A" font-size="12">Drafting</text>
+
+                        <!-- Style/Tone (Right) -->
+                        <circle cx="650" cy="200" r="35" fill="#4A3029" stroke="#FF6B3D" stroke-width="4"/>
+                        <text x="650" y="190" text-anchor="middle" fill="#FFA07A" font-size="16">Aa</text>
+                        <text x="650" y="205" text-anchor="middle" fill="#FFA07A" font-size="12">Style</text>
+                        <path d="M635 175 Q650 195 665 175" stroke="#FFA07A" stroke-width="2" fill="none">
+                            <animate attributeName="d" values="M635 175 Q650 195 665 175;M635 180 Q650 200 665 180;M635 175 Q650 195 665 175" dur="3s" repeatCount="indefinite"/>
+                        </path>
+
+                        <!-- Editing (Bottom) -->
+                        <circle cx="400" cy="250" r="35" fill="#4A3029" stroke="#FF6B3D" stroke-width="4"/>
+                        <path d="M385 245 L395 255 L415 235" fill="none" stroke="#FFA07A" stroke-width="3">
+                            <animate attributeName="stroke-dasharray" values="0,100;50,0" dur="1s" fill="freeze"/>
+                        </path>
+                        <text x="400" y="275" text-anchor="middle" fill="#FFA07A" font-size="12">Editing</text>
+
+                        <!-- Connecting lines -->
+                        <g stroke="#FF6B3D" stroke-width="2" stroke-dasharray="5,5">
+                            <line x1="230" y1="85" x2="360" y2="150">
+                                <animate attributeName="stroke-dasharray" values="5,5;3,3;5,5" dur="2s" repeatCount="indefinite"/>
+                            </line>
+                            <line x1="570" y1="85" x2="440" y2="150">
+                                <animate attributeName="stroke-dasharray" values="5,5;3,3;5,5" dur="2s" repeatCount="indefinite"/>
+                            </line>
+                            <line x1="185" y1="200" x2="360" y2="150">
+                                <animate attributeName="stroke-dasharray" values="5,5;3,3;5,5" dur="2s" repeatCount="indefinite"/>
+                            </line>
+                            <line x1="615" y1="200" x2="440" y2="150">
+                                <animate attributeName="stroke-dasharray" values="5,5;3,3;5,5" dur="2s" repeatCount="indefinite"/>
+                            </line>
+                            <line x1="400" y1="215" x2="400" y2="190">
+                                <animate attributeName="stroke-dasharray" values="5,5;3,3;5,5" dur="2s" repeatCount="indefinite"/>
+                            </line>
+                        </g>
+
+                        <!-- Animated particles along connections -->
+                        <circle cx="0" cy="0" r="3" fill="#FFA07A">
+                            <animateMotion dur="3s" repeatCount="indefinite"
+                                path="M230,85 L360,150" />
+                        </circle>
+                        <circle cx="0" cy="0" r="3" fill="#FFA07A">
+                            <animateMotion dur="3s" repeatCount="indefinite"
+                                path="M570,85 L440,150" />
+                        </circle>
+                        <circle cx="0" cy="0" r="3" fill="#FFA07A">
+                            <animateMotion dur="3s" repeatCount="indefinite"
+                                path="M185,200 L360,150" />
+                        </circle>
+                        <circle cx="0" cy="0" r="3" fill="#FFA07A">
+                            <animateMotion dur="3s" repeatCount="indefinite"
+                                path="M615,200 L440,150" />
+                        </circle>
+                        <circle cx="0" cy="0" r="3" fill="#FFA07A">
+                            <animateMotion dur="3s" repeatCount="indefinite"
+                                path="M400,215 L400,190" />
+                        </circle>
+                    </svg>
+                </div>
+            </section>
+
+            <!-- Brainstorming -->
+            <section>
+                <h2>1. Brainstorming & Ideation</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <p class="fragment fade-in">Input prompt:</p>
+                        <pre class="fragment fade-in">"Generate article ideas about 
+sustainable urban farming 
+for young professionals"</pre>
+                        
+                        <p class="fragment fade-in">Benefits:</p>
+                        <ul>
+                            <li class="fragment fade-in">Overcome writer's block</li>
+                            <li class="fragment fade-in">Explore new angles</li>
+                            <li class="fragment fade-in">Rapid iteration</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <p class="fragment fade-in">LLM Response:</p>
+                        <ul>
+                            <li class="fragment fade-in">"Balcony-to-Table: Starting Your Mini Garden in 1 Hour"</li>
+                            <li class="fragment fade-in">"5 Smart Devices That Water Your Plants While You're at Work"</li>
+                            <li class="fragment fade-in">"Urban Farming Communities: Finding Your Green Network"</li>
+                            <li class="fragment fade-in">"From Microgreens to Meals: High-ROI Plants for Busy People"</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Content Organization -->
+            <section>
+                <h2>2. Content Organization</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <p class="fragment fade-in">Input:</p>
+                        <pre class="fragment fade-in">"Help me organize my thoughts 
+about remote work culture 
+into a coherent outline"</pre>
+                    </div>
+                    <div class="feature-card">
+                        <p class="fragment fade-in">Output:</p>
+                        <pre class="fragment fade-in">I. Evolution of Remote Work
+   A. Pre-pandemic trends
+   B. Covid-19 impact
+   C. Current landscape
+
+II. Core Components
+   A. Digital infrastructure
+   B. Communication protocols
+   C. Team dynamics
+
+III. Best Practices
+   A. Establishing routines
+   B. Virtual collaboration
+   C. Work-life boundaries</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Draft Generation -->
+            <section>
+                <h2>3. Draft Generation</h2>
+                <h3 class="fragment fade-in">From Outline to First Draft</h3>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <p class="fragment fade-in">Key Features:</p>
+                        <ul>
+                            <li class="fragment fade-in">Maintains consistent tone</li>
+                            <li class="fragment fade-in">Follows structural guidance</li>
+                            <li class="fragment fade-in">Incorporates key points</li>
+                            <li class="fragment fade-in">Generates citations</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <p class="fragment fade-in">Pro Tips:</p>
+                        <ul>
+                            <li class="fragment fade-in">Provide detailed context</li>
+                            <li class="fragment fade-in">Specify target audience</li>
+                            <li class="fragment fade-in">Include style preferences</li>
+                            <li class="fragment fade-in">Set clear parameters</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Style and Tone -->
+            <section>
+                <h2>4. Style and Tone Adjustment</h2>
+                <p class="fragment fade-in">Same message, different contexts:</p>
+                <div class="myth-reality">
+                    <div class="feature-card">
+                        <h3>Original</h3>
+                        <pre class="fragment fade-in">"Meeting postponed 
+to next week"</pre>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Variations</h3>
+                        <pre class="fragment fade-in">Formal:
+"The scheduled meeting has been 
+rescheduled to next week. We 
+apologize for any inconvenience."
+
+Casual:
+"Hey team! Quick update - we're 
+pushing the meeting to next week. 
+Thanks for being flexible! 😊"
+
+Technical:
+"Meeting ID #4872 rescheduled:
+Current: 2024-02-02 13:00 UTC
+New: 2024-02-09 13:00 UTC
+Status: Pending confirmation"</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Editing and Refinement -->
+            <section>
+                <h2>5. Editing and Refinement</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <p class="fragment fade-in">Capabilities:</p>
+                        <ul>
+                            <li class="fragment fade-in">Grammar & style checks</li>
+                            <li class="fragment fade-in">Clarity improvements</li>
+                            <li class="fragment fade-in">Conciseness</li>
+                            <li class="fragment fade-in">Consistency in tone</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <p class="fragment fade-in">Example prompt:</p>
+                        <pre class="fragment fade-in">"Review this text for clarity 
+and conciseness, maintaining 
+a professional tone while 
+making it more engaging."</pre>
+                        <p class="fragment fade-in">Pro tip:</p>
+                        <p class="fragment fade-in">"Ask for specific types of 
+improvements rather than 
+general editing."</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Best Practices for Prompting - Section Title -->
+            <section>
+                <h2>Best Practices for Prompting</h2>
+                <div class="feature-card">
+                    <p class="fragment fade-in">The art of communicating with LLMs</p>
+                    <ul>
+                        <li class="fragment fade-in">Clear instructions yield better results</li>
+                        <li class="fragment fade-in">Context matters enormously</li>
+                        <li class="fragment fade-in">Iterative refinement is key</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Core Principles -->
+            <section>
+                <div class="header-with-icon">
+                    <h2>Core Principles</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" style="width: 80px; height: 80px; margin-left: 15px; vertical-align: middle;">
+                        <!-- Lightbulb body -->
+                        <path d="M80 140 C40 100 40 60 80 40 C120 20 160 40 160 90 C160 120 120 140 120 140" fill="#4A3029" stroke="#FF6B3D" stroke-width="8"/>
+                        <!-- Base -->
+                        <path d="M80 140 L120 140 L115 150 L85 150 L80 140" fill="#FF6B3D"/>
+                        <path d="M85 150 L115 150 L112 160 L88 160 L85 150" fill="#FF6B3D"/>
+                        <!-- Light rays -->
+                        <path d="M70 30 L50 10 M130 30 L150 10 M160 90 L180 90 M40 90 L20 90" stroke="#FFA07A" stroke-width="6">
+                            <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+                        </path>
+                        <!-- Idea sparkles -->
+                        <circle cx="100" cy="70" r="20" fill="#FFA07A" opacity="0.6">
+                            <animate attributeName="r" values="15;20;15" dur="1.5s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                </div>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <h3>Be Specific</h3>
+                        <pre class="fragment fade-in">❌ "Make this better"
+✅ "Make this email more 
+persuasive by emphasizing 
+the ROI and adding a clear 
+call to action"</pre>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Provide Context</h3>
+                        <pre class="fragment fade-in">❌ "Write a conclusion"
+✅ "Write a conclusion for a 
+blog post about sustainable 
+farming, targeting urban 
+millennials. The post covered: 
+[key points]"</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Role and Style -->
+            <section>
+                <h2>Define Role and Style</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <p class="fragment fade-in">Set the stage:</p>
+                        <pre class="fragment fade-in">"Act as an experienced 
+technical writer creating 
+documentation for senior 
+developers. Use detailed 
+code examples and focus on 
+edge cases."</pre>
+                    </div>
+                    <div class="feature-card">
+                        <p class="fragment fade-in">Specify style:</p>
+                        <pre class="fragment fade-in">"Write in a conversational 
+tone, using analogies to 
+explain complex concepts. 
+Target audience is beginners 
+with basic programming 
+knowledge."</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Iterative Refinement -->
+            <section>
+                <h2>Iterative Refinement</h2>
+                <div class="feature-card">
+                    <p class="fragment fade-in">Example workflow:</p>
+                    <ol>
+                        <li class="fragment fade-in">Start with basic prompt</li>
+                        <li class="fragment fade-in">Review output and identify gaps</li>
+                        <li class="fragment fade-in">Request specific improvements</li>
+                        <li class="fragment fade-in">Fine-tune style and tone</li>
+                    </ol>
+                </div>
+                <div class="feature-card fragment fade-in">
+                    <pre>"This is good, but can you:
+1. Make it more concise
+2. Add specific examples
+3. Use more technical terminology"</pre>
+                </div>
+            </section>
+
+            <!-- Advanced Techniques -->
+            <section>
+                <h2>Advanced Techniques</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <h3>Chain of Thought</h3>
+                        <pre class="fragment fade-in">"Let's approach this step by step:
+1. First, outline the key points
+2. Then, expand each section
+3. Finally, add transitions"</pre>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Temperature Control</h3>
+                        <pre class="fragment fade-in">"Be creative and generate 
+multiple unique approaches"
+
+vs.
+
+"Stick to established best 
+practices and standard 
+terminology"</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Common Pitfalls -->
+            <section>
+                <h2>Common Pitfalls to Avoid</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <h3>Don't</h3>
+                        <ul>
+                            <li class="fragment fade-in">Be vague or ambiguous</li>
+                            <li class="fragment fade-in">Assume context is understood</li>
+                            <li class="fragment fade-in">Request everything at once</li>
+                            <li class="fragment fade-in">Ignore iterative improvement</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Do</h3>
+                        <ul>
+                            <li class="fragment fade-in">Be specific and clear</li>
+                            <li class="fragment fade-in">Provide relevant context</li>
+                            <li class="fragment fade-in">Break down complex tasks</li>
+                            <li class="fragment fade-in">Refine through iteration</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Live Demo Slide -->
+            <section>
+                <h2>Interactive Demo</h2>
+                <div class="feature-card">
+                    <p class="fragment fade-in">Let's improve this prompt together:</p>
+                    <pre class="fragment fade-in">Before:
+"Write something about AI"</pre>
+					<pre class="fragment fade-in">After:
+"Write a 500-word blog post about 
+practical applications of AI in 
+healthcare. Focus on recent 
+developments in diagnostic imaging 
+and early disease detection. 
+Include 2-3 specific case studies 
+and conclude with future trends. 
+Target audience: healthcare 
+professionals with basic AI 
+knowledge."</pre>
+                </div>
+            </section>
+
+            <!-- Workflow Integration - Section Title -->
+            <section>
+                <h2>Workflow Integration</h2>
+                <div class="feature-card">
+                    <p class="fragment fade-in">Making LLMs part of your writing process</p>
+                    <ul>
+                        <li class="fragment fade-in">When to use AI assistance</li>
+                        <li class="fragment fade-in">How to maintain creative control</li>
+                        <li class="fragment fade-in">Tools and platforms</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- When to Use -->
+            <section>
+                <h2>Strategic Integration Points</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <h3>High-Value Uses</h3>
+                        <ul>
+                            <li class="fragment fade-in">Initial brainstorming</li>
+                            <li class="fragment fade-in">Structural organization</li>
+                            <li class="fragment fade-in">Research summaries</li>
+                            <li class="fragment fade-in">Draft expansion</li>
+                            <li class="fragment fade-in">Final polish</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Less Effective Uses</h3>
+                        <ul>
+                            <li class="fragment fade-in">Core creative decisions</li>
+                            <li class="fragment fade-in">Personal voice development</li>
+                            <li class="fragment fade-in">Factual verification</li>
+                            <li class="fragment fade-in">Technical accuracy</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Writing Pipeline -->
+            <section>
+                <h2>The AI-Enhanced Writing Pipeline</h2>
+                <div class="feature-card">
+                    <pre class="fragment fade-in">  Research  →  Outline  →  Draft  →  Review  →  Polish
+      ↑           ↑          ↑         ↑          ↑
+   Summary    Structure    Expand    Style      Refine
+  Generator    Support     Ideas     Guide      Editor</pre>
+                    <p class="fragment fade-in">AI assists at each stage while you maintain creative control</p>
+                </div>
+            </section>
+
+            <!-- Tools & Platforms -->
+            <section>
+                <h2>Tools and Platforms</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <h3>Standalone Tools</h3>
+                        <ul>
+                            <li class="fragment fade-in">ChatGPT</li>
+                            <li class="fragment fade-in">Claude</li>
+                            <li class="fragment fade-in">Bard</li>
+                            <li class="fragment fade-in">Custom APIs</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Integrated Solutions</h3>
+                        <ul>
+                            <li class="fragment fade-in">Writing apps with AI features</li>
+                            <li class="fragment fade-in">Browser extensions</li>
+                            <li class="fragment fade-in">Document editor plugins</li>
+                            <li class="fragment fade-in">Custom integrations</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Best Practices for Prompting -->
+            <section>
+                <div class="header-with-icon">
+                    <h2>Best Practices for Prompting</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" style="width: 80px; height: 80px; margin-left: 15px; vertical-align: middle;">
+                        <!-- Main chat bubble -->
+                        <path d="M20 40 L160 40 C180 40 180 60 180 80 L180 120 C180 140 160 140 160 140 L100 140 L80 160 L60 140 L20 140 C10 140 10 120 10 120 L10 60 C10 40 20 40 20 40" 
+                              fill="#4A3029" stroke="#FF6B3D" stroke-width="4"/>
+                        <!-- Chat lines -->
+                        <line x1="40" y1="70" x2="150" y2="70" stroke="#FFA07A" stroke-width="4" stroke-linecap="round">
+                            <animate attributeName="x2" values="40;150;150" dur="1.5s" fill="freeze"/>
+                        </line>
+                        <line x1="40" y1="90" x2="120" y2="90" stroke="#FFA07A" stroke-width="4" stroke-linecap="round">
+                            <animate attributeName="x2" values="40;120;120" dur="1.5s" begin="0.2s" fill="freeze"/>
+                        </line>
+                        <line x1="40" y1="110" x2="140" y2="110" stroke="#FFA07A" stroke-width="4" stroke-linecap="round">
+                            <animate attributeName="x2" values="40;140;140" dur="1.5s" begin="0.4s" fill="freeze"/>
+                        </line>
+                        <!-- Cursor -->
+                        <rect x="40" y="70" width="4" height="20" fill="#FF6B3D">
+                            <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/>
+                        </rect>
+                    </svg>
+                </div>
+                <div class="feature-card">
+                    <p class="fragment fade-in">The art of communicating with LLMs</p>
+                    <ul>
+                        <li class="fragment fade-in">Clear instructions yield better results</li>
+                        <li class="fragment fade-in">Context matters enormously</li>
+                        <li class="fragment fade-in">Iterative refinement is key</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Case Study -->
+            <section>
+                <h2>Case Study: Blog Post Creation</h2>
+                <div class="feature-card">
+                    <p class="fragment fade-in">Traditional Process: 4 hours</p>
+                    <p class="fragment fade-in">AI-Enhanced Process: 1.5 hours</p>
+                    <pre class="fragment fade-in">1. Topic Research (AI: 15min vs Manual: 1hr)
+   - Quick summaries of current trends
+   - Identifying key talking points
+
+2. Outline Creation (AI: 10min vs Manual: 30min)
+   - Structure suggestions
+   - Section organization
+
+3. Draft Writing (AI: 30min vs Manual: 1.5hr)
+   - Section expansion
+   - Example generation
+
+4. Review & Polish (AI: 35min vs Manual: 1hr)
+   - Style consistency
+   - Clarity improvements</pre>
+                </div>
+            </section>
+
+            <!-- Maintaining Control -->
+            <section>
+                <h2>Maintaining Creative Control</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <h3>Key Principles</h3>
+                        <ul>
+                            <li class="fragment fade-in">AI as tool, not replacement</li>
+                            <li class="fragment fade-in">Clear creative direction</li>
+                            <li class="fragment fade-in">Regular human review</li>
+                            <li class="fragment fade-in">Quality benchmarks</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Quality Checks</h3>
+                        <ul>
+                            <li class="fragment fade-in">Voice consistency</li>
+                            <li class="fragment fade-in">Factual accuracy</li>
+                            <li class="fragment fade-in">Content originality</li>
+                            <li class="fragment fade-in">Target audience fit</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ethics and Considerations -->
+            <section>
+                <div class="header-with-icon">
+                    <h2>Ethics and Considerations</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" style="width: 80px; height: 80px; margin-left: 15px; vertical-align: middle;">
+                        <!-- Shield base -->
+                        <path d="M100 20 L160 40 L160 100 C160 150 100 180 100 180 C100 180 40 150 40 100 L40 40 Z" 
+                              fill="#4A3029" stroke="#FF6B3D" stroke-width="8"/>
+                        <!-- Checkmark -->
+                        <path d="M70 100 L90 120 L130 80" 
+                              fill="none" stroke="#FFA07A" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+                            <animate attributeName="stroke-dasharray" values="0,1000;200,1000" dur="1s" fill="freeze"/>
+                        </path>
+                        <!-- Shield highlight -->
+                        <path d="M100 30 L140 45" stroke="#FFA07A" stroke-width="3" opacity="0.5"/>
+                    </svg>
+                </div>
+                <div class="feature-card">
+                    <h3 class="fragment fade-in">Responsible use of AI in writing</h3>
+                    <ul>
+                        <li class="fragment fade-in">Transparency with stakeholders</li>
+                        <li class="fragment fade-in">Attribution and ownership</li>
+                        <li class="fragment fade-in">Quality control and verification</li>
+						<li class="fragment fade-in">Privacy and data security</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Transparency -->
+            <section>
+                <h2>Transparency Best Practices</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <h3>When to Disclose AI Use</h3>
+                        <ul>
+                            <li class="fragment fade-in">Academic submissions</li>
+                            <li class="fragment fade-in">Professional publications</li>
+                            <li class="fragment fade-in">Client deliverables</li>
+                            <li class="fragment fade-in">Team collaborations</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h3>How to Disclose</h3>
+                        <pre class="fragment fade-in">Sample disclosure:
+"This document was drafted with 
+AI assistance and underwent 
+human review and verification. 
+All facts and figures have been 
+independently checked."</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Attribution -->
+            <section>
+                <h2>Attribution and Ownership</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <h3>Key Principles</h3>
+                        <ul>
+                            <li class="fragment fade-in">Clear ownership declaration</li>
+                            <li class="fragment fade-in">Credit for human creativity</li>
+                            <li class="fragment fade-in">Transparency about AI role</li>
+                            <li class="fragment fade-in">Documentation of process</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Documentation Example</h3>
+                        <pre class="fragment fade-in">Writing Process:
+- Original concept: [Author]
+- AI assistance: Structure, 
+  research compilation
+- Final content: Human-written
+  with AI-enhanced editing
+- Fact-checking: Manual 
+  verification</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quality Control -->
+            <section>
+                <h2>Quality Control Framework</h2>
+                <div class="feature-card">
+                    <h3 class="fragment fade-in">Verification Checklist</h3>
+                    <div class="split-screen">
+                        <div>
+                            <ul>
+                                <li class="fragment fade-in">Fact verification</li>
+                                <li class="fragment fade-in">Source checking</li>
+                                <li class="fragment fade-in">Consistency review</li>
+                                <li class="fragment fade-in">Plagiarism check</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <ul>
+                                <li class="fragment fade-in">Logic validation</li>
+                                <li class="fragment fade-in">Expert review</li>
+                                <li class="fragment fade-in">Audience feedback</li>
+                                <li class="fragment fade-in">Impact assessment</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Privacy -->
+            <section>
+                <h2>Privacy and Data Security</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <h3>Data Handling Guidelines</h3>
+                        <ul>
+                            <li class="fragment fade-in">No sensitive information in prompts</li>
+                            <li class="fragment fade-in">Use private instances when needed</li>
+                            <li class="fragment fade-in">Clear data retention policies</li>
+                            <li class="fragment fade-in">Regular security reviews</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Safe Practice Examples</h3>
+                        <pre class="fragment fade-in">✅ "Review this public blog post"
+❌ "Check this internal memo"
+
+✅ "Generic template review"
+❌ "Client-specific content"
+
+✅ "Industry standard process"
+❌ "Proprietary workflow"</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Academic Integrity -->
+            <section>
+                <h2>Academic and Professional Integrity</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <h3>Guidelines</h3>
+                        <ul>
+                            <li class="fragment fade-in">Follow institutional policies</li>
+                            <li class="fragment fade-in">Document AI assistance</li>
+                            <li class="fragment fade-in">Maintain academic rigor</li>
+                            <li class="fragment fade-in">Use appropriate citations</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Acceptable Uses</h3>
+                        <ul>
+                            <li class="fragment fade-in">Research summarization</li>
+                            <li class="fragment fade-in">Writing feedback</li>
+                            <li class="fragment fade-in">Structure suggestions</li>
+                            <li class="fragment fade-in">Grammar checking</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Future Considerations -->
+            <section>
+                <h2>Looking Ahead</h2>
+                <div class="split-screen">
+					<div class="feature-card">
+						<h3>Emerging Considerations</h3>
+						<ul>
+							<li class="fragment fade-in">Evolving AI capabilities and limitations</li>
+							<li class="fragment fade-in">New ethical guidelines and standards</li>
+							<li class="fragment fade-in">Industry-specific best practices</li>
+							<li class="fragment fade-in">Balancing innovation with responsibility</li>
+						</ul>
+					</div>
+					<div class="feature-card">
+						<h3>Stay informed about</h3>
+						<ul>
+							<li class="fragment fade-in">Policy updates</li>
+							<li class="fragment fade-in">Industry standards</li>
+							<li class="fragment fade-in">Best practices</li>
+							<li class="fragment fade-in">Tool capabilities</li>
+						</ul>
+					</div>
+                </div>
+            </section>
+
+            <!-- Practical Tips -->
+            <section>
+                <div class="header-with-icon">
+                    <h2>Practical Tips</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" style="width: 80px; height: 80px; margin-left: 15px; vertical-align: middle;">
+                        <!-- Main gear -->
+                        <circle cx="100" cy="100" r="50" fill="#4A3029" stroke="#FF6B3D" stroke-width="8"/>
+                        <!-- Gear teeth -->
+                        <path d="M100 30 L90 10 L110 10 L100 30" fill="#FF6B3D">
+                            <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="10s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M100 30 L90 10 L110 10 L100 30" fill="#FF6B3D" transform="rotate(45 100 100)">
+                            <animateTransform attributeName="transform" type="rotate" from="45 100 100" to="405 100 100" dur="10s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M100 30 L90 10 L110 10 L100 30" fill="#FF6B3D" transform="rotate(90 100 100)">
+                            <animateTransform attributeName="transform" type="rotate" from="90 100 100" to="450 100 100" dur="10s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M100 30 L90 10 L110 10 L100 30" fill="#FF6B3D" transform="rotate(135 100 100)">
+                            <animateTransform attributeName="transform" type="rotate" from="135 100 100" to="495 100 100" dur="10s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M100 30 L90 10 L110 10 L100 30" fill="#FF6B3D" transform="rotate(180 100 100)">
+                            <animateTransform attributeName="transform" type="rotate" from="180 100 100" to="540 100 100" dur="10s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M100 30 L90 10 L110 10 L100 30" fill="#FF6B3D" transform="rotate(225 100 100)">
+                            <animateTransform attributeName="transform" type="rotate" from="225 100 100" to="585 100 100" dur="10s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M100 30 L90 10 L110 10 L100 30" fill="#FF6B3D" transform="rotate(270 100 100)">
+                            <animateTransform attributeName="transform" type="rotate" from="270 100 100" to="630 100 100" dur="10s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M100 30 L90 10 L110 10 L100 30" fill="#FF6B3D" transform="rotate(315 100 100)">
+                            <animateTransform attributeName="transform" type="rotate" from="315 100 100" to="675 100 100" dur="10s" repeatCount="indefinite"/>
+                        </path>
+                        <!-- Center circle -->
+                        <circle cx="100" cy="100" r="15" fill="#FFA07A"/>
+                    </svg>
+                </div>
+                <div class="feature-card">
+                    <p class="fragment fade-in">Getting Started with AI Writing Assistance</p>
+                    <ul>
+                        <li class="fragment fade-in">Start small, scale gradually</li>
+                        <li class="fragment fade-in">Build effective habits</li>
+                        <li class="fragment fade-in">Learn from experience</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Quick Wins -->
+            <section>
+                <h2>Quick Wins to Start Today</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <h3>Easy Starting Points</h3>
+                        <ul>
+                            <li class="fragment fade-in">Email templates</li>
+                            <li class="fragment fade-in">Meeting summaries</li>
+                            <li class="fragment fade-in">Basic outlines</li>
+                            <li class="fragment fade-in">Style improvements</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Sample First Project</h3>
+                        <pre class="fragment fade-in">1. Take an existing email
+2. Ask for 3 variations
+3. Compare outputs
+4. Mix and match best parts
+5. Create template
+Time invested: 10 minutes
+Future time saved: Hours</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Building Good Habits -->
+            <section>
+                <h2>Building Effective Habits</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <h3>Daily Practices</h3>
+                        <ul>
+                            <li class="fragment fade-in">Start with an outline</li>
+                            <li class="fragment fade-in">Save successful prompts</li>
+                            <li class="fragment fade-in">Document improvements</li>
+                            <li class="fragment fade-in">Review AI outputs critically</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Prompt Library</h3>
+                        <pre class="fragment fade-in">Create folders for:
+- Email templates
+- Document outlines
+- Style guides
+- Review checklists
+- Process documentation</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section>
+                <h2>Common Challenges & Solutions</h2>
+                <div class="feature-card">
+                    <div class="split-screen">
+                        <div>
+                            <h3>Challenge</h3>
+                            <ul>
+                                <li class="fragment fade-in">Inconsistent results</li>
+                                <li class="fragment fade-in">Off-target content</li>
+                                <li class="fragment fade-in">Generic outputs</li>
+                                <li class="fragment fade-in">Time management</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3>Solution</h3>
+                            <ul>
+                                <li class="fragment fade-in">Use template prompts</li>
+                                <li class="fragment fade-in">Add more context</li>
+                                <li class="fragment fade-in">Be more specific</li>
+                                <li class="fragment fade-in">Create workflows</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Resource Management -->
+            <section>
+                <h2>Managing Resources Effectively</h2>
+                <div class="split-screen">
+                    <div class="feature-card">
+                        <h3>Time Management</h3>
+                        <ul>
+                            <li class="fragment fade-in">Batch similar tasks</li>
+                            <li class="fragment fade-in">Create reusable templates</li>
+                            <li class="fragment fade-in">Schedule AI sessions</li>
+                            <li class="fragment fade-in">Track time savings</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Cost Optimization</h3>
+                        <ul>
+                            <li class="fragment fade-in">Use appropriate models</li>
+                            <li class="fragment fade-in">Draft offline first</li>
+                            <li class="fragment fade-in">Combine related tasks</li>
+                            <li class="fragment fade-in">Monitor usage patterns</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Next Steps -->
+            <section>
+                <div class="header-with-icon">
+                    <h2>Your Next Steps</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" style="width: 80px; height: 80px; margin-left: 15px; vertical-align: middle;">
+                        <!-- Road path -->
+                        <path d="M20 180 C60 180 60 120 100 120 C140 120 140 60 180 60" 
+                              fill="none" stroke="#FF6B3D" stroke-width="8" stroke-linecap="round">
+                            <animate attributeName="stroke-dasharray" values="0,1000;200,1000" dur="2s" fill="freeze"/>
+                        </path>
+                        <!-- Milestones -->
+                        <circle cx="20" cy="180" r="15" fill="#4A3029" stroke="#FF6B3D" stroke-width="4"/>
+                        <circle cx="100" cy="120" r="15" fill="#4A3029" stroke="#FF6B3D" stroke-width="4"/>
+                        <circle cx="180" cy="60" r="15" fill="#4A3029" stroke="#FF6B3D" stroke-width="4"/>
+                        <!-- Goal flag -->
+                        <path d="M170 30 L170 60 L190 45 L170 30" fill="#FFA07A">
+                            <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+                        </path>
+                    </svg>
+                </div>
+                <div class="feature-card">
+                    <h3 class="fragment fade-in">This Week</h3>
+                    <ol>
+                        <li class="fragment fade-in">Choose one type of writing task</li>
+                        <li class="fragment fade-in">Create 3 template prompts</li>
+                        <li class="fragment fade-in">Test and refine approach</li>
+                        <li class="fragment fade-in">Document what works</li>
+                    </ol>
+                </div>
+                <div class="feature-card fragment fade-in">
+                    <h3>This Month</h3>
+                    <ol>
+                        <li class="fragment fade-in">Build your prompt library</li>
+                        <li class="fragment fade-in">Establish regular AI writing sessions</li>
+                        <li class="fragment fade-in">Share successes with team</li>
+                        <li class="fragment fade-in">Measure time savings</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Closing -->
+            <section>
+                <div class="header-with-icon">
+                    <h2>Key Takeaways</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" style="width: 80px; height: 80px; margin-left: 15px; vertical-align: middle;">
+                        <!-- Checkmark container -->
+                        <circle cx="100" cy="100" r="90" fill="#4A3029" stroke="#FF6B3D" stroke-width="8"/>
+                        <!-- Checkmark -->
+                        <path d="M50 100 L90 140 L150 80" 
+                              fill="none" stroke="#FFA07A" stroke-width="12" 
+                              stroke-linecap="round" stroke-linejoin="round">
+                            <animate attributeName="stroke-dasharray" 
+                                     values="0,1000;200,1000" 
+                                     dur="1.5s" 
+                                     fill="freeze"/>
+                        </path>
+                    </svg>
+                </div>
+                <div class="feature-card">
+                    <ul>
+                        <li class="fragment fade-in">AI is a powerful writing assistant, not a replacement</li>
+                        <li class="fragment fade-in">Start small, focus on quick wins</li>
+                        <li class="fragment fade-in">Build a library of effective prompts</li>
+                        <li class="fragment fade-in">Maintain quality through human oversight</li>
+                        <li class="fragment fade-in">Share and learn from others' experiences</li>
+                    </ul>
+                </div>
+                <div class="feature-card fragment fade-in">
+                    <p>Questions?</p>
+                    <p>example@example.com</p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+    <script>
+        Reveal.initialize({
+            controls: true,
+            progress: true,
+            center: false,
+            hash: true,
+            transition: 'slide',
+            width: 1200,
+            height: 700,
+            margin: 0.1,
+            fragmentInURL: true,
+            autoAnimate: true
+        });
+    </script>
+</body>
+</html>
